@@ -14,6 +14,7 @@ from stable_baselines3.common.callbacks import BaseCallback  # type: ignore[impo
 from typing import TypedDict
 import time
 
+plt.style.use(["science", "grid"])
 # Register the environment
 gym.register(
     id="MultiInv-v0",
@@ -22,10 +23,10 @@ gym.register(
 
 # Environment parameters
 n_locations = 4
-starting_inventory = [50.0 for _ in range(n_locations)]
+starting_inventory = [20.0 for _ in range(n_locations)]
 kwargs = {
     "n_locations": n_locations,
-    "n_timesteps": 100,
+    "n_timesteps": 50,
     "starting_inventory": starting_inventory,
     "lead_times": [[2 for _ in range(n_locations)] for _ in range(n_locations)],
     "costs": {"unit": 1.0, "holding": 1.0, "shipment": 10.0},
@@ -136,7 +137,7 @@ def plot_inventory_levels(
         if not location_stockouts.empty:
             ax.legend()
         else:  # Add placeholder legend entry if no stockouts
-            ax.plot([], [], " ", label="No Stockouts")
+            # ax.plot([], [], " ", label="No Stockouts")
             ax.legend()
 
     # Hide any unused subplots
@@ -146,14 +147,18 @@ def plot_inventory_levels(
     plt.tight_layout()
     # Updated title to reflect plot content more accurately
     plt.suptitle(
-        f"Inventory Levels During Evaluation (Episode {episode_num}, Timesteps {total_timesteps})",
+        f"Timesteps {total_timesteps}",
         fontsize=16,
     )
     plt.subplots_adjust(top=0.92)
 
     # Save the figure
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.92)
     plt.savefig(
-        f"./ppo_inventory_plots/inventory_episode_{episode_num}_timesteps_{total_timesteps}.png"
+        f"./ppo_inventory_plots/inventory_episode_{episode_num}_timesteps_{total_timesteps}.png",
+        dpi=300,
+        bbox_inches="tight",
     )
     plt.close()
 
@@ -246,14 +251,12 @@ def main():
     vecnormalize_path = "./ppo_training_logs/vecnormalize.pkl"
 
     # Load normalization stats if they exist and apply to eval_env
+    eval_env = DummyVecEnv([make_eval_env])
     if os.path.exists(vecnormalize_path):
-        print(f"Loading VecNormalize statistics from {vecnormalize_path}")
-        # Load stats into a VecNormalize wrapper for the eval_env
         eval_env = VecNormalize.load(vecnormalize_path, eval_env)
-        # IMPORTANT: Ensure eval_env is not in training mode
         eval_env.training = False
-        # IMPORTANT: Do not update reward normalization stats during evaluation
-        eval_env.norm_reward = False  # Turn off reward normalization for evaluation
+        eval_env.norm_reward = False
+        eval_env.norm_obs = False
         print("Evaluation environment normalization loaded.")
     else:
         # If stats don't exist (e.g., first run), create VecNormalize wrapper without loading
@@ -300,8 +303,8 @@ def main():
     # eval_env.gamma = model.gamma # Set gamma for eval_env too if norm_reward=True during eval
 
     total_timesteps = 0
-    max_timesteps = 5_000_000
-    increment = 500_000
+    max_timesteps = 500_000
+    increment = 50_000
     episode_num = 0  # Tracks training *iterations*, not environment episodes
 
     # Initialize the callback object for storing eval data
@@ -382,50 +385,47 @@ def main():
         num_steps = 0
         max_eval_steps = kwargs.get("n_timesteps", 100) + 10  # Safety margin
 
-        while not done and num_steps < max_eval_steps:
+        while not done:
+            if num_steps >= max_eval_steps:
+                print(
+                    f"Warning: Evaluation loop exceeded max_eval_steps ({max_eval_steps}) without termination signal."
+                )
+                break
             action, _ = model.predict(obs, deterministic=True)
-
-            # --- CORRECTED STEP UNPACKING ---
             obs, rewards, dones, infos = eval_env.step(action)
-            # --- END CORRECTION ---
-
-            # --- MANUAL LOGGING WITH ROBUST CHECKS ---
-            # --- MANUAL LOGGING USING UNNORMALIZE_OBS ---
-            # --- MANUAL LOGGING USING UNNORMALIZE_OBS (Corrected for Dict Obs) ---
-            # --- MANUAL LOGGING USING UNNORMALIZE_OBS (Corrected for Dict Obs + Squeeze) ---
             try:
-                # Step 1: 'obs' is the dictionary of batched, normalized values.
-                unnormalized_obs_dict = eval_env.unnormalize_obs(
-                    obs
-                )  # Pass the whole dict
+                # Try to get inventory directly from the unwrapped environment
+                raw_env = eval_env.venv.envs[0].env.unwrapped
 
-                # --- Validation Steps (Keep as before) ---
-                if not isinstance(unnormalized_obs_dict, dict):
-                    print(
-                        f"Error Step {num_steps}: unnormalize_obs() did not return a dict. Type: {type(unnormalized_obs_dict)}"
+                # Check if we can access inventory directly
+                if hasattr(raw_env, "inventory"):
+                    # Use the raw inventory value
+                    current_inventory = raw_env.inventory
+                    print(f"Direct inventory access: {current_inventory}")
+                    inventory_callback.inventory_histories.append(
+                        current_inventory.copy()
                     )
-                    num_steps += 1
-                    done = dones[0]
-                    continue
-                if "inventory" not in unnormalized_obs_dict:
+
+                    # Log stockouts using raw inventory
+                    for loc, inv in enumerate(current_inventory):
+                        if inv <= 0:
+                            inventory_callback.stockout_events.append(
+                                {"location": loc, "step": num_steps}
+                            )
+                else:
+                    # Fall back to unnormalized observation if direct access isn't available
+                    # Keep your existing normalized/unnormalized code as fallback
                     print(
-                        f"Error Step {num_steps}: 'inventory' key missing. Keys: {unnormalized_obs_dict.keys()}"
+                        "Using observation-based inventory (no direct access available)"
                     )
-                    num_steps += 1
-                    done = dones[0]
-                    continue
-                current_inventory_data = unnormalized_obs_dict["inventory"]
-                if not isinstance(current_inventory_data, (np.ndarray, list)):
-                    print(
-                        f"Error Step {num_steps}: 'inventory' not array/list. Type: {type(current_inventory_data)}"
-                    )
-                    num_steps += 1
-                    done = dones[0]
-                    continue
+                    unnormalized_obs_dict = eval_env.unnormalize_obs(obs)
+
+                    # Continue with your existing code for processing unnormalized observations
+                    # ...
                 # --- End Validation ---
 
                 # --- SQUEEZE and Logging ---
-                inventory_np = np.array(current_inventory_data)
+                inventory_np = np.array(current_inventory)
 
                 # --->>> CRITICAL FIX: Remove singleton dimensions <<<---
                 inventory_squeezed = np.squeeze(inventory_np)
@@ -493,6 +493,12 @@ def main():
 
             # Increment step counter only if logging didn't 'continue'
             num_steps += 1
+            if num_steps % 10 == 0:
+                print(f"Step {num_steps}, done flag: {done}")
+                if hasattr(raw_env, "_elapsed_steps"):
+                    print(
+                        f"Environment internal step counter: {raw_env._elapsed_steps}"
+                    )
 
         if num_steps >= max_eval_steps and not done:
             print(

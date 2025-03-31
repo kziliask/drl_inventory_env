@@ -109,6 +109,7 @@ dependencies = [
     { name = "gymnasium" },
     { name = "mypy" },
     { name = "pre-commit" },
+    { name = "scienceplots" },
     { name = "stable-baselines3" },
     { name = "tensorboard" },
 ]
@@ -118,8 +119,9 @@ requires-dist = [
     { name = "gymnasium", specifier = ">=1.1.1" },
     { name = "mypy", specifier = ">=1.15" },
     { name = "pre-commit", specifier = ">=4.2" },
+    { name = "scienceplots", specifier = ">=2.1.1" },
     { name = "stable-baselines3", specifier = ">=2.6" },
-    { name = "tensorboard", specifier = ">=2.19.0" },
+    { name = "tensorboard", specifier = ">=2.19" },
 ]
 
 [[package]]
@@ -867,6 +869,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/fe/0f/25911a9f080464c59fab9027482f822b86bf0608957a5fcc6eaac85aa515/PyYAML-6.0.2-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:68ccc6023a3400877818152ad9a1033e3db8625d899c72eacb5a668902e4d652", size = 751597 },
     { url = "https://files.pythonhosted.org/packages/14/0d/e2c3b43bbce3cf6bd97c840b46088a3031085179e596d4929729d8d68270/PyYAML-6.0.2-cp313-cp313-win32.whl", hash = "sha256:bc2fa7c6b47d6bc618dd7fb02ef6fdedb1090ec036abab80d4681424b84c1183", size = 140527 },
     { url = "https://files.pythonhosted.org/packages/fa/de/02b54f42487e3d3c6efb3f89428677074ca7bf43aae402517bc7cca949f3/PyYAML-6.0.2-cp313-cp313-win_amd64.whl", hash = "sha256:8388ee1976c416731879ac16da0aff3f63b286ffdd57cdeb95f3f2e085687563", size = 156446 },
+]
+
+[[package]]
+name = "scienceplots"
+version = "2.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5e/04/aff33daa212cf6dd5427999062aab0289976dd1b0b842752e81ab17aef66/SciencePlots-2.1.1.tar.gz", hash = "sha256:d8d197e3410f87ebdad0b9c265eaab596094fb082d97123e835f6bc32800ab54", size = 10757 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/51/2a/debffdd7061c7a65ab46c51e671b895dc8231c4a14950849c40699eb2070/SciencePlots-2.1.1-py3-none-any.whl", hash = "sha256:2e64d2e93b4f98702f30145dbb70d238f5dc315e227fec331489631232dfc9e0", size = 16472 },
 ]
 
 [[package]]
