@@ -256,7 +256,7 @@ class MultiInvEnv(gym.Env):
                 for row in action:
                     for val in row:
                         if val >= 1.0:
-                            reward -= 0.01
+                            reward -= 0.00
                 # reward -= (
                 #         self.lam_param
                 #         * action[location][other_location]
@@ -453,6 +453,6 @@ class MultiInvEnv(gym.Env):
 if __name__ == "__main__":
     gym.register(
         id="MultiInv-v0",
-        entry_point="env.multibase_env:MultiInvEnv",
+        entry_point="example_env:MultiInvEnv",
     )
     print(gym.pprint_registry())

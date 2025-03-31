@@ -15,4 +15,5 @@ dependencies = [
   "mypy>=1.15",
   "pre-commit>=4.2",
   "stable-baselines3>=2.6",
+  "tensorboard>=2.19",
 ]

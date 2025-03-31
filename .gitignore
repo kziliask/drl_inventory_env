@@ -5,6 +5,10 @@ build/
 dist/
 wheels/
 *.egg-info
-
+*_training_logs/
+*_models/
+*_csv_data/
+.mypy_cache/
+.ruff_cache/
 # Virtual environments
 .venv
