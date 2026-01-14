@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+type: conference-paper
+title: "Bridging the Gap: A Practical Guide to Implementing Deep Reinforcement Learning Simulation in Operations Research with Gymnasium"
+authors:
+  - family-names: Ziliaskopoulos
+    given-names: Konstantinos
+    affiliation: "Dept. of Industrial and Systems Engineering, Auburn University, Auburn, AL, USA"
+  - family-names: Vinel
+    given-names: Alexander
+    affiliation: "Dept. of Industrial and Systems Engineering, Auburn University, Auburn, AL, USA"
+  - family-names: Smith
+    given-names: Alice E.
+    affiliation: "Dept. of Industrial and Systems Engineering, Auburn University, Auburn, AL, USA"
+year: 2025
+keywords:
+  - deep reinforcement learning
+  - simulation
+  - operations research
+  - Gymnasium
+preferred-citation:
+  type: conference-paper
+  title: "Bridging the Gap: A Practical Guide to Implementing Deep Reinforcement Learning Simulation in Operations Research with Gymnasium"
+  authors:
+    - family-names: Ziliaskopoulos
+      given-names: Konstantinos
+    - family-names: Vinel
+      given-names: Alexander
+    - family-names: Smith
+      given-names: Alice E.
+  year: 2025
+  conference:
+    name: "Winter Simulation Conference"
+  proceedings:
+    title: "Proceedings of the 2025 Winter Simulation Conference"
+  editors:
+    - family-names: Azar
+      given-names: E.
+    - family-names: Djanatliev
+      given-names: A.
+    - family-names: Harper
+      given-names: A.
+    - family-names: Kogler
+      given-names: C.
+    - family-names: Ramamohan
+      given-names: V.
+    - family-names: Anagnostou
+      given-names: A.
+    - family-names: Taylor
+      given-names: S. J. E.
